@@ -27,6 +27,7 @@
 # include <arpa/inet.h>
 # include <pcap.h>
 # include <sys/wait.h>
+# include <pthread.h>
 
 # define SCAN_TCP	(1 << 0)
 # define SCAN_SYN	(1 << 1)
@@ -42,14 +43,21 @@ struct	s_data
 {
 	t_flag	flag;
 	char	**av_data;
-	char	*host;
+	t_list	*host;
 	t_list	*port;
 	int		threads;
 	int		scan;
 };
 
+struct s_host
+{
+	struct sockaddr_in	*addr;
+	char				*
+};
+
 static t_cliopts	g_opts[];
 
 void	nmap(t_data *data);
+void	*nmap_listener(void *arg);
 
 #endif

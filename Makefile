@@ -33,6 +33,7 @@ OBJ_DIR		=	objs/
 SRC_BASE	=	\
 main.c\
 nmap.c\
+listener.c\
 
 SRCS		=	$(addprefix $(SRC_DIR), $(SRC_BASE))
 OBJS		=	$(addprefix $(OBJ_DIR), $(SRC_BASE:.c=.o))
@@ -48,7 +49,7 @@ $(NAME):	$(LIBFT_LIB) $(OBJ_DIR) $(OBJS) $(CLIENT_OBJ)
 		-I $(INC_DIR) \
 		-I $(LIBFT_INC) \
 		$(LIBFT_LIB) $(CLIENT_OBJ) $(FLAGS) \
-		-lm -lpcap
+		-lm -lpcap -lpthread
 	@printf "\r\033[38;5;117m✓ MAKE $@ \033[0m\033[K\n"
 
 $(LIBFT_LIB):

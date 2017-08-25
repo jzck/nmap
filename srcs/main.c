@@ -5,7 +5,35 @@
 
 int		nmap_get_host(char *opt_arg, t_data *data)
 {
-	data->host = opt_arg;
+	t_host	*host;
+
+	host = opt_arg;
+	struct sockaddr_in	*addr;
+	struct addrinfo		*servinfo, hints;
+	char				addrstr[INET_ADDRSTRLEN];
+	int					sockfd;
+
+	memset (&hints, 0, sizeof (hints));
+	hints.ai_family = PF_UNSPEC;
+	hints.ai_socktype = SOCK_RAW;
+	hints.ai_flags = AI_CANONNAME;
+
+	if (getaddrinfo(host, NULL, &hints, &servinfo))
+	{
+		fprintf(stderr, "Failed to resolve \"%s\"\n", host);
+		return (1);
+	}
+	host->addr = (struct sockaddr_in*)servinfo->ai_addr;
+	inet_ntop(AF_INET, &(addr->sin_addr), addrstr, INET_ADDRSTRLEN);
+	host->addrstr = addrstr;
+
+	/* MUST DO AND rDNS search here */
+	/* printf("rDNS record for %s: %s\n", addrstr, DOMAIN NAME WITH RDNS); */
+
+	if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_TCP)) == -1)
+		perror("server: socket");
+
+	ft_lsteadd(&data->host, &host);
 	return (0);
 }
 
@@ -87,6 +115,8 @@ int		main(int ac, char **av)
 		exit(1);
 	}
 
+	pthread_t listener;
+	pthread_create(&listener, NULL, &nmap_listener, &data);
 	nmap(&data);
 	return (0);
 }
