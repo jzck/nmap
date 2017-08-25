@@ -12,7 +12,7 @@
 
 SHELL		:=	bash
 
-NAME		=	ft_ping
+NAME		=	ft_nmap
 
 CC			=	gcc
 W_FLAGS		=	-Wall -Wextra -Werror
@@ -31,7 +31,8 @@ INC_DIR		=	includes/
 OBJ_DIR		=	objs/
 
 SRC_BASE	=	\
-ping.c\
+main.c\
+nmap.c\
 
 SRCS		=	$(addprefix $(SRC_DIR), $(SRC_BASE))
 OBJS		=	$(addprefix $(OBJ_DIR), $(SRC_BASE:.c=.o))
@@ -47,7 +48,7 @@ $(NAME):	$(LIBFT_LIB) $(OBJ_DIR) $(OBJS) $(CLIENT_OBJ)
 		-I $(INC_DIR) \
 		-I $(LIBFT_INC) \
 		$(LIBFT_LIB) $(CLIENT_OBJ) $(FLAGS) \
-		-lm
+		-lm -lpcap
 	@printf "\r\033[38;5;117m✓ MAKE $@ \033[0m\033[K\n"
 
 $(LIBFT_LIB):
@@ -61,7 +62,7 @@ $(OBJ_DIR)%.o :	$(SRC_DIR)%.c | $(OBJ_DIR)
 	@$(eval PERCENT=$(shell echo $$(($(INDEX)*100/$(NB)))))
 	@$(eval TO_DO=$(shell echo $$((20-$(INDEX)*20/$(NB) - 1))))
 	@$(eval COLOR=$(shell list=(160 196 202 208 215 221 226 227 190 154 118 82 46); index=$$(($(PERCENT) * $${#list[@]} / 100)); echo "$${list[$$index]}"))
-	@printf "\r\033[38;5;%dm⌛ [%s]: %2d%% `printf '█%.0s' {0..$(DONE)}`%*s❙%*.*s\033[0m\033[K" $(COLOR) ft_p $(PERCENT) $(TO_DO) "" $(DELTA) $(DELTA) "$(shell echo "$@" | sed 's/^.*\///')"
+	@printf "\r\033[38;5;%dm⌛ [%s]: %2d%% `printf '█%.0s' {0..$(DONE)}`%*s❙%*.*s\033[0m\033[K" $(COLOR) $(NAME) $(PERCENT) $(TO_DO) "" $(DELTA) $(DELTA) "$(shell echo "$@" | sed 's/^.*\///')"
 	@$(CC) $(FLAGS) $(OBJ_FLAG) -MMD -c $< -o $@\
 		-I $(INC_DIR)\
 		-I $(LIBFT_INC)

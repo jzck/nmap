@@ -23,14 +23,33 @@
 # include <netinet/in.h>
 # include <netinet/ip.h>
 # include <netinet/ip_icmp.h>
+# include <netinet/if_ether.h>
+# include <arpa/inet.h>
+# include <pcap.h>
 # include <sys/wait.h>
 
-#define PACKETSIZE	64
+# define SCAN_TCP	(1 << 0)
+# define SCAN_SYN	(1 << 1)
+# define SCAN_NULL	(1 << 2)
+# define SCAN_ACK	(1 << 3)
+# define SCAN_FIN	(1 << 4)
+# define SCAN_XMAS	(1 << 5)
+# define SCAN_UDP	(1 << 6)
 
-struct s_packet
+typedef struct s_data	t_data;
+
+struct	s_data
 {
-	struct icmp hdr;
-	char msg[PACKETSIZE - sizeof(struct icmp)];
+	t_flag	flag;
+	char	**av_data;
+	char	*host;
+	t_list	*port;
+	int		threads;
+	int		scan;
 };
+
+static t_cliopts	g_opts[];
+
+void	nmap(t_data *data);
 
 #endif
