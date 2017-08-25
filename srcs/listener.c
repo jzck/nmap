@@ -8,7 +8,7 @@ static void packet_callback(u_char *tmp, const struct pcap_pkthdr *pkthdr, const
 	(void)tmp;
 	(void)pkthdr;
 	(void)packet;
-	printf("received packet !!!");
+	printf("received packet !!!\n");
 }
 
 void	*nmap_listener(void *arg)
@@ -30,7 +30,7 @@ void	*nmap_listener(void *arg)
 		fprintf(stderr, "pcap_open_live: %s", errbuf);
 		exit(EXIT_FAILURE);
 	}
-	if (!(str = ft_str3join("host ", data->host, " and (tcp or icmp)")))
+	if (!(str = ft_str3join("host ", ((t_host*)data->host->content)->ip, " and (tcp or icmp)")))
 	{
 		exit(EXIT_FAILURE);
 	}

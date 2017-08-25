@@ -33,6 +33,7 @@ OBJ_DIR		=	objs/
 SRC_BASE	=	\
 main.c\
 nmap.c\
+parser.c\
 listener.c\
 
 SRCS		=	$(addprefix $(SRC_DIR), $(SRC_BASE))
