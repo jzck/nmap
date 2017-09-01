@@ -20,6 +20,7 @@
 # include <sys/time.h>
 # include <resolv.h>
 # include <netdb.h>
+# include <net/if.h>
 # include <netinet/in.h>
 # include <netinet/ip.h>
 # include <netinet/ip_icmp.h>
@@ -27,6 +28,7 @@
 # include <pcap.h>
 # include <sys/wait.h>
 # include <pthread.h>
+# include <ifaddrs.h>
 
 # define SCAN_TCP	(1 << 0)
 # define SCAN_SYN	(1 << 1)
@@ -46,7 +48,8 @@ struct	s_data
 {
 	t_flag	flag;
 	char	**av_data;
-	t_list	*host;
+	t_list	*dest_addr;
+	struct sockaddr	source_addr;
 	t_list	*port;
 	int		threads;
 	int		scan;
@@ -90,17 +93,12 @@ struct	s_tcp_packet
 {
 	struct iphdr iph;
 	struct tcphdr tcph;
-};
+}__attribute__((packed));
 
 static t_cliopts	g_opts[];
+int		nmap_parse(int ac, char **av, t_data *data);
 
 void	nmap(t_data *data);
 void	*nmap_listener(void *arg);
-
-int		nmap_get_host(char *node, t_data *data);
-int		nmap_get_file(char *opt_arg, t_data *data);
-int		nmap_get_ports(char *opt_arg, t_data *data);
-int		nmap_get_threads(char *opt_arg, t_data *data);
-int		nmap_get_scan(char *opt_arg, t_data *data);
 
 #endif

@@ -30,7 +30,7 @@ void	*nmap_listener(void *arg)
 		fprintf(stderr, "pcap_open_live: %s", errbuf);
 		exit(EXIT_FAILURE);
 	}
-	if (!(str = ft_str3join("host ", ((t_host*)data->host->content)->ip, " and (tcp or icmp)")))
+	if (!(str = ft_str3join("host ", ((t_host*)data->dest_addr->content)->ip, " and (tcp or icmp)")))
 	{
 		exit(EXIT_FAILURE);
 	}
@@ -47,6 +47,7 @@ void	*nmap_listener(void *arg)
 	fflush(stdout);
 	if (pcap_loop(pcap_obj, -1, packet_callback, (u_char*)data) == -1)
 	{
+		printf("pcap_loop fail\n");
 		exit(EXIT_FAILURE);
 	}
 	free(str);
