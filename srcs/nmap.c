@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   nmap.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/22 14:10:24 by jhalford          #+#    #+#             */
-/*   Updated: 2017/04/23 18:18:41 by jhalford         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "nmap.h"
 
 unsigned short cksum(void *b, int len)
@@ -26,34 +14,37 @@ unsigned short cksum(void *b, int len)
 	return (~(sum + (sum >> 16)));
 }
 
-int		nmap_scan_tcp(t_data *data, struct iphdr *iph, t_host *host, int port)
+coroutine void	nmap_scan_port(t_data *data, struct iphdr *iph, int port)
 {
+	int				channel;
 	t_tcp_packet	packet;
 
-	packet.iph = *iph;
+	channel = data.channels[port];
 
+	packet.iph = *iph;
 	tcphdr_init(&packet.tcph);
 	packet.tcph.dest = htons(port);
 	packet.tcph.source = htons(data->src_port);
 	/* packet.tcph.syn = 1; */
 	packet.tcph.check = cksum(&packet, sizeof(t_tcp_packet));
+
+	if ((host.sock_tcp = socket(AF_INET, SOCK_RAW, IPPROTO_TCP)) == -1)
+		perror("server: socket");
+
+	int val = 1;
+	if (setsockopt(host.sock_tcp, IPPROTO_IP, IP_HDRINCL, &val, sizeof(val)) == -1)
+		return (1);
+
+
 	if (sendto(host->sock_tcp, &packet, sizeof(packet), 0, host->addr, host->addrlen) < 0)
 	{
 		perror("sendto");
 		exit(1);
 	}
+	/* chrecv(channel, &buf, sizeof()) */
 	printf("packet sent\n");
 	hexdump(&packet, sizeof(packet));
-	sleep(2);
-	return (0);
 }
-
-/* int		nmap_scan(char *host, int port, int scan) */
-/* { */
-/* 	(void)scan; */
-/* 	nmap_scan_syn(sockfd, servinfo); */
-/* 	return (0); */
-/* } */
 
 void	nmap(t_data *data)
 {
@@ -61,21 +52,20 @@ void	nmap(t_data *data)
 	t_host	*host;
 	struct iphdr	iph;
 
-	list = data->dest_addr;
-	if (!list)
-		return ;
-	for (host = list->content; list != NULL; list = list->next )
+	iphdr_init(&iph);
+	iph.protocol = IPPROTO_TCP;
+	iph.daddr = *(uint32_t*)&((struct sockaddr_in*)host->addr)->sin_addr;
+	iph.saddr = *(uint32_t*)&((struct sockaddr_in*)&data->source_addr)->sin_addr;
+	iph.tot_len = htons(sizeof(t_tcp_packet));
+
+	for (t_list *list = data->host; list != NULL; list = list->next)
 	{
+		t_host *host = list->content;
 		printf("scanning %s...\n", host->dn);
-
-		iphdr_init(&iph);
-		iph.protocol = IPPROTO_TCP;
-		iph.daddr = *(uint32_t*)&((struct sockaddr_in*)host->addr)->sin_addr;
-		iph.saddr = *(uint32_t*)&((struct sockaddr_in*)&data->source_addr)->sin_addr;
-		iph.tot_len = htons(sizeof(t_tcp_packet));
-
-		nmap_scan_tcp(data, &iph, host, 80);
-		break ;
+		for (port = 1; port < USHRT_MAX; port++;)
+		{
+			if (data.ports[port])
+				go(nmap_scan_port(data, iph, port));
+		}
 	}
 }
-

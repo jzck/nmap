@@ -2,16 +2,17 @@
 
 static pcap_t *pcap_obj = NULL;
 
-static void packet_callback(u_char *tmp, const struct pcap_pkthdr *pkthdr, const u_char *packet)
+static void packet_callback(u_char *arg, const struct pcap_pkthdr *pkthdr, const u_char *packet)
 
 {
-	(void)tmp;
 	(void)pkthdr;
 	(void)packet;
+	t_data *data = (t_data*)arg;
 	printf("received packet !!!\n");
+	hexdump(&packet, sizeof(packet));
 }
 
-void	*nmap_listener(void *arg)
+coroutine void	nmap_listener(void *arg)
 {
 	t_data *data;
 	char errbuf[PCAP_ERRBUF_SIZE];
@@ -30,7 +31,7 @@ void	*nmap_listener(void *arg)
 		fprintf(stderr, "pcap_open_live: %s", errbuf);
 		exit(EXIT_FAILURE);
 	}
-	if (!(str = ft_str3join("host ", ((t_host*)data->dest_addr->content)->ip, " and (tcp or icmp)")))
+	if (!(str = ft_str3join("host ", ((t_host*)data->host->content)->ip, " and (tcp or icmp)")))
 	{
 		exit(EXIT_FAILURE);
 	}
@@ -51,5 +52,4 @@ void	*nmap_listener(void *arg)
 		exit(EXIT_FAILURE);
 	}
 	free(str);
-	return (NULL);
 }

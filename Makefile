@@ -50,7 +50,7 @@ $(NAME):	$(LIBFT_LIB) $(OBJ_DIR) $(OBJS) $(CLIENT_OBJ)
 		-I $(INC_DIR) \
 		-I $(LIBFT_INC) \
 		$(LIBFT_LIB) $(CLIENT_OBJ) $(FLAGS) \
-		-lm -lpcap -lpthread
+		-lm -lpcap -lpthread /usr/local/lib/libdill.a
 	@printf "\r\033[38;5;117m✓ MAKE $@ \033[0m\033[K\n"
 
 $(LIBFT_LIB):

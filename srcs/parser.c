@@ -1,5 +1,15 @@
 #include "nmap.h"
 
+static t_cliopts	g_opts[] =
+{
+	{'h', "host", 0, 0, nmap_get_host, 0},
+	/* {'f', "file", 0, 0, nmap_get_file, 0}, */
+	/* {'p', "ports", 0, 0, nmap_get_ports, 0}, */
+	{'t', "threads", 0, 0, nmap_get_threads, 0},
+	{'s', "scan", 0, 0, nmap_get_scan, 0},
+	{0, 0, 0, 0, 0, 0},
+};
+
 static int		nmap_get_host(char *node, t_data *data)
 {
 	t_host	host;
@@ -37,14 +47,7 @@ static int		nmap_get_host(char *node, t_data *data)
 	/* MUST DO rDNS search here */
 	/* printf("rDNS record for %s: %s\n", addrstr, DOMAIN NAME WITH RDNS); */
 
-	if ((host.sock_tcp = socket(AF_INET, SOCK_RAW, IPPROTO_TCP)) == -1)
-		perror("server: socket");
-
-	int val = 1;
-	if (setsockopt(host.sock_tcp, IPPROTO_IP, IP_HDRINCL, &val, sizeof(val)) == -1)
-		return (1);
-
-	ft_lsteadd(&data->dest_addr, ft_lstnew(&host, sizeof(host)));
+	ft_lsteadd(&data->host, ft_lstnew(&host, sizeof(host)));
 	return (0);
 }
 
@@ -91,14 +94,14 @@ int		nmap_parse(int ac, char **av, t_data *data)
 {
 	struct ifaddrs	*ifaddrs, *ifa_first;
 	(void)ac;
-	data->dest_addr = NULL;
-	data->port = 0;
+	data->host = NULL;
+	bzero(data->ports, USHRT_MAX + 1);
 	data->threads = 0;
 	data->scan = 0;
 
 	if (cliopts_get(av, g_opts, data))
 		return (ft_perror("nmap"));
-	if (!data->dest_addr && data->av_data && data->av_data)
+	if (!data->host && data->av_data && data->av_data)
 		nmap_get_host(*data->av_data, data);
 	if (!data->scan)
 		data->scan = SCAN_TCP;
@@ -108,25 +111,27 @@ int		nmap_parse(int ac, char **av, t_data *data)
 	if (ifaddrs)
 	{
 		ifaddrs=ifaddrs->ifa_next;
-		printf("source=%s\n", ifaddrs->ifa_name);
+		printf("if=%s\n", ifaddrs->ifa_name);
 		data->source_addr = *ifaddrs->ifa_addr;
 	}
 	else
 	{
-		printf("couldn't find an IF that isn't a loopback");
+		fprintf(stderr, "couldn't find an internet interface\n");
 		exit(1);
 	}
 	freeifaddrs(ifa_first);
+
+	for (t_list *list = data->host; list != NULL; list = list->next)
+	{
+		t_host *host = list->content;
+		printf("scanning %s...\n", host->dn);
+		for (port = 1; port < USHRT_MAX; port++;)
+		{
+			if (data.ports[port])
+				host->channels[port] = chmake(sizeof(t_tcp_packet));
+		}
+	}
+
 	return (0);
 }
-
-static t_cliopts	g_opts[] =
-{
-	{'i', "ip", 0, 0, nmap_get_host, 0},
-	/* {'f', "file", 0, 0, nmap_get_file, 0}, */
-	/* {'p', "ports", 0, 0, nmap_get_ports, 0}, */
-	{'t', "threads", 0, 0, nmap_get_threads, 0},
-	{'s', "scan", 0, 0, nmap_get_scan, 0},
-	{0, 0, 0, 0, 0, 0},
-};
 

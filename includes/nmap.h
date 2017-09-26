@@ -30,6 +30,8 @@
 # include <pthread.h>
 # include <ifaddrs.h>
 
+# include <libdill.h>
+
 # define SCAN_TCP	(1 << 0)
 # define SCAN_SYN	(1 << 1)
 # define SCAN_NULL	(1 << 2)
@@ -48,12 +50,12 @@ struct	s_data
 {
 	t_flag	flag;
 	char	**av_data;
-	t_list	*dest_addr;
+	t_list	*host;
 	struct sockaddr	source_addr;
-	t_list	*port;
+	int		ports[USHRT_MAX + 1];
 	int		threads;
-	int		scan;
 	int		src_port;
+	int		scan;
 };
 
 /* enum e_scan_type */
@@ -84,7 +86,7 @@ struct s_host
 	int		sock_udp;
 	int		sock_icmp;
 	t_port_status results[USHRT_MAX + 1];
-	char	scanning[USHRT_MAX + 1];
+	int		channels[USHRT_MAX + 1];
 	struct sockaddr *addr;
 	size_t	addrlen;
 };
@@ -99,6 +101,6 @@ static t_cliopts	g_opts[];
 int		nmap_parse(int ac, char **av, t_data *data);
 
 void	nmap(t_data *data);
-void	*nmap_listener(void *arg);
+void	nmap_listener(void *arg);
 
 #endif
