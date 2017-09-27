@@ -27,7 +27,7 @@ static int		nmap_get_host(char *node, t_data *data)
 	}
 	host.addr = servinfo->ai_addr;
 	host.addrlen = servinfo->ai_addrlen;
-	host.node = node;
+	host.host = node;
 	host.dn = servinfo->ai_canonname;
 
 	void *addr;

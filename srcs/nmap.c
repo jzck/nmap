@@ -14,17 +14,17 @@ unsigned short cksum(void *b, int len)
 	return (~(sum + (sum >> 16)));
 }
 
-coroutine void	nmap_scan_port(t_data *data, struct iphdr *iph, int port)
+coroutine void	nmap_scan_node(t_host *host, struct iphdr *iph, int port)
 {
 	int				channel;
 	t_tcp_packet	packet;
 
-	channel = data.channels[port];
+	channel = host.channels[port];
 
 	packet.iph = *iph;
 	tcphdr_init(&packet.tcph);
 	packet.tcph.dest = htons(port);
-	packet.tcph.source = htons(data->src_port);
+	packet.tcph.source = ;
 	/* packet.tcph.syn = 1; */
 	packet.tcph.check = cksum(&packet, sizeof(t_tcp_packet));
 
@@ -58,6 +58,7 @@ void	nmap(t_data *data)
 	iph.saddr = *(uint32_t*)&((struct sockaddr_in*)&data->source_addr)->sin_addr;
 	iph.tot_len = htons(sizeof(t_tcp_packet));
 
+	int		fan_in = chmake();
 	for (t_list *list = data->host; list != NULL; list = list->next)
 	{
 		t_host *host = list->content;
@@ -65,7 +66,11 @@ void	nmap(t_data *data)
 		for (port = 1; port < USHRT_MAX; port++;)
 		{
 			if (data.ports[port])
-				go(nmap_scan_port(data, iph, port));
+			{
+				int fan_in_local = hdup(fan_in);
+				go(nmap_scan_node(data, iph, port, fan_in_local));
+			}
 		}
 	}
+	return (fan_in);
 }

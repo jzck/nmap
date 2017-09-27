@@ -54,7 +54,6 @@ struct	s_data
 	struct sockaddr	source_addr;
 	int		ports[USHRT_MAX + 1];
 	int		threads;
-	int		src_port;
 	int		scan;
 };
 
@@ -79,7 +78,7 @@ enum e_port_status
 
 struct s_host
 {
-	char	*node;					// user inputed node (ip or dn)
+	char	*host;					// user input host (ip or dn)
 	char	*dn;					// ai_canonname
 	char	ip[INET6_ADDRSTRLEN];	// readable ip address (4 or 6)
 	int		sock_tcp;

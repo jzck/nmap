@@ -27,8 +27,8 @@ int		main(int ac, char **av)
 	}
 	int port_chan = chmake(sizeof(int));
 	go(nmap_listener(&data));
-	go(nmap_ports(&data, port_chan));
+	/* go(nmap_ports(&data, port_chan)); */
 	/* go(nmap_collector(&data)); */
-	nmap(&data);
+	int chan = nmap(&data);
 	return (0);
 }
