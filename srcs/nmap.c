@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   nmap.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/10/08 19:10:07 by jhalford          #+#    #+#             */
+/*   Updated: 2017/10/08 21:27:50 by jhalford         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "nmap.h"
 
 unsigned short cksum(void *b, int len)
@@ -36,7 +48,8 @@ coroutine void	nmap_scan_node(t_host *host, struct iphdr *iph, int port)
 		return (1);
 
 
-	if (sendto(host->sock_tcp, &packet, sizeof(packet), 0, host->addr, host->addrlen) < 0)
+	if (sendto(data->sock_tcp, &packet, sizeof(packet), 0,
+				host->addr, host->addrlen) < 0)
 	{
 		perror("sendto");
 		exit(1);
@@ -48,8 +61,8 @@ coroutine void	nmap_scan_node(t_host *host, struct iphdr *iph, int port)
 
 void	nmap(t_data *data)
 {
-	t_list	*list;
-	t_host	*host;
+	t_list			*list;
+	t_host			*host;
 	struct iphdr	iph;
 
 	iphdr_init(&iph);
@@ -57,8 +70,7 @@ void	nmap(t_data *data)
 	iph.daddr = *(uint32_t*)&((struct sockaddr_in*)host->addr)->sin_addr;
 	iph.saddr = *(uint32_t*)&((struct sockaddr_in*)&data->source_addr)->sin_addr;
 	iph.tot_len = htons(sizeof(t_tcp_packet));
-
-	int		fan_in = chmake();
+	int		fan_in = chmake(sizeof());
 	for (t_list *list = data->host; list != NULL; list = list->next)
 	{
 		t_host *host = list->content;

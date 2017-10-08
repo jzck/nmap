@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/04/22 14:10:24 by jhalford          #+#    #+#             */
-/*   Updated: 2017/04/22 15:52:07 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/08 21:27:51 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@
 # include <pthread.h>
 # include <ifaddrs.h>
 
-# include <libdill.h>
+# include "libdill.h"
 
 # define SCAN_TCP	(1 << 0)
 # define SCAN_SYN	(1 << 1)
@@ -46,28 +46,20 @@ typedef struct s_host	t_host;
 typedef struct s_tcp_packet	t_tcp_packet;
 typedef enum e_port_status	t_port_status;
 
-struct	s_data
+struct				s_data
 {
-	t_flag	flag;
-	char	**av_data;
-	t_list	*host;
-	struct sockaddr	source_addr;
-	int		ports[USHRT_MAX + 1];
-	int		threads;
-	int		scan;
+	t_flag			flag;
+	char			**av_data;
+	t_list			*host;
+
+	int				sock_tcp;
+	int				threads;
+	int				scan;
 };
 
-/* enum e_scan_type */
-/* { */
-/* 	SCAN_SYN, */
-/* 	SCAN_NULL, */
-/* 	SCAN_ACK, */
-/* 	SCAN_FIN, */
-/* 	SCAN_XMAS, */
-/* 	SCAN_UDP, */
-/* }; */
+struct				
 
-enum e_port_status
+enum	e_port_status
 {
 	OPEN,
 	FILTERED,
@@ -76,18 +68,20 @@ enum e_port_status
 	OPEN_FILTERED,
 };
 
-struct s_host
+struct				s_host
 {
-	char	*host;					// user input host (ip or dn)
-	char	*dn;					// ai_canonname
-	char	ip[INET6_ADDRSTRLEN];	// readable ip address (4 or 6)
-	int		sock_tcp;
-	int		sock_udp;
-	int		sock_icmp;
-	t_port_status results[USHRT_MAX + 1];
-	int		channels[USHRT_MAX + 1];
-	struct sockaddr *addr;
-	size_t	addrlen;
+	char			*host;					// user input host (ip or dn)
+	char			*dn;					// ai_canonname
+	char			ip[INET6_ADDRSTRLEN];	// readable ip address (4 or 6)
+	struct s_target	ports[USHRT_MAX + 1];
+	struct sockaddr	*addr;
+	size_t			addrlen;
+};
+
+struct				s_target
+{
+	int				in_channel;
+	t_port_status	results[SCAN_MAX];
 };
 
 struct	s_tcp_packet

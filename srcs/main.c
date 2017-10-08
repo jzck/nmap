@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/10/08 19:10:04 by jhalford          #+#    #+#             */
+/*   Updated: 2017/10/08 21:27:57 by jhalford         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "nmap.h"
 
 #define NMAP_USAGE1	" [--ip HOST] [--file FILE]"
@@ -20,15 +32,19 @@ int		main(int ac, char **av)
 		printf("or     nmap"NMAP_USAGE1 NMAP_USAGE2"\n");
 		exit(1);
 	}
-	if (reserve_port(&data.src_port))
+
+	// single tcp port
+	struct sockaddr_in	sa;
+	sa.sin_family = AF_INET;
+	sa.sin_addr.s_addr = INADDR_ANY;
+	if (reserve_port(data.sock_tcp, &sa))
 	{
 		fprintf(stderr, "couldn't reserve port\n");
 		exit(1);
 	}
-	int port_chan = chmake(sizeof(int));
+
 	go(nmap_listener(&data));
-	/* go(nmap_ports(&data, port_chan)); */
-	/* go(nmap_collector(&data)); */
 	int chan = nmap(&data);
+	nmap_collector(chan, &data);
 	return (0);
 }

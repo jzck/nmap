@@ -6,7 +6,7 @@
 #    By: wescande <wescande@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/08/29 21:32:58 by wescande          #+#    #+#              #
-#    Updated: 2017/04/22 19:26:34 by jhalford         ###   ########.fr        #
+#    Updated: 2017/10/08 19:09:21 by jhalford         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -48,7 +48,9 @@ all :
 $(NAME):	$(LIBFT_LIB) $(OBJ_DIR) $(OBJS) $(CLIENT_OBJ)
 	@$(CC) $(OBJS) -o $@ \
 		-I $(INC_DIR) \
+		-I $(HOME)/.bin/include \
 		-I $(LIBFT_INC) \
+		-L $(HOME)/.bin/lib \
 		$(LIBFT_LIB) $(CLIENT_OBJ) $(FLAGS) \
 		-lm -lpcap -lpthread /usr/local/lib/libdill.a
 	@printf "\r\033[38;5;117m✓ MAKE $@ \033[0m\033[K\n"
@@ -66,7 +68,8 @@ $(OBJ_DIR)%.o :	$(SRC_DIR)%.c | $(OBJ_DIR)
 	@$(eval COLOR=$(shell list=(160 196 202 208 215 221 226 227 190 154 118 82 46); index=$$(($(PERCENT) * $${#list[@]} / 100)); echo "$${list[$$index]}"))
 	@printf "\r\033[38;5;%dm⌛ [%s]: %2d%% `printf '█%.0s' {0..$(DONE)}`%*s❙%*.*s\033[0m\033[K" $(COLOR) $(NAME) $(PERCENT) $(TO_DO) "" $(DELTA) $(DELTA) "$(shell echo "$@" | sed 's/^.*\///')"
 	@$(CC) $(FLAGS) $(OBJ_FLAG) -MMD -c $< -o $@\
-		-I $(INC_DIR)\
+		-I $(INC_DIR) \
+		-I $(HOME)/.bin/include \
 		-I $(LIBFT_INC)
 	@$(eval INDEX=$(shell echo $$(($(INDEX)+1))))
 

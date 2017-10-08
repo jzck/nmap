@@ -8,11 +8,11 @@ static void packet_callback(u_char *arg, const struct pcap_pkthdr *pkthdr, const
 	(void)pkthdr;
 	(void)packet;
 	t_data *data = (t_data*)arg;
-	printf("received packet !!!\n");
+	ft_printf("received packet !!!\n");
 	hexdump(&packet, sizeof(packet));
 }
 
-coroutine void	nmap_listener(void *arg)
+coroutine void	nmap_listener(t_data *data)
 {
 	t_data *data;
 	char errbuf[PCAP_ERRBUF_SIZE];
@@ -44,11 +44,10 @@ coroutine void	nmap_listener(void *arg)
 		exit(EXIT_FAILURE);
 	}
 	/* signal(SIGALRM, sigalrm_handler); */
-	printf("listener loop\n");
-	fflush(stdout);
+	ft_printf("listener loop\n");
 	if (pcap_loop(pcap_obj, -1, packet_callback, (u_char*)data) == -1)
 	{
-		printf("pcap_loop fail\n");
+		ft_printf("pcap_loop fail\n");
 		exit(EXIT_FAILURE);
 	}
 	free(str);
