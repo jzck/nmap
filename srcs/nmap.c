@@ -6,83 +6,111 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/08 19:10:07 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/08 21:27:50 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/09 17:12:31 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "nmap.h"
 
-unsigned short cksum(void *b, int len)
+t_scanner	g_scanners[SCAN_MAX]
 {
-	unsigned short	*buf = b;
-	unsigned int	sum=0;
-
-	for (sum = 0; len > 1; len -= 2)
-		sum += *((unsigned short*)buf++);
-	if (len == 1)
-		sum += *(unsigned char*)buf;
-
-	sum = (sum >> 16) + (sum & 0xFFFF);
-	return (~(sum + (sum >> 16)));
+	scan_tcp,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	/* scan_syn, */
+	/* scan_ack, */
+	/* scan_fin, */
+	/* scan_xmas, */
+	/* scan_udp, */
 }
 
-coroutine void	nmap_scan_node(t_host *host, struct iphdr *iph, int port)
+coroutine void	nmap_scan_port(int ch, t_data *data, t_target target)
 {
-	int				channel;
-	t_tcp_packet	packet;
+	int			fan_in;
+	int			fan_in_local;
+	int			scan;
 
-	channel = host.channels[port];
-
-	packet.iph = *iph;
-	tcphdr_init(&packet.tcph);
-	packet.tcph.dest = htons(port);
-	packet.tcph.source = ;
-	/* packet.tcph.syn = 1; */
-	packet.tcph.check = cksum(&packet, sizeof(t_tcp_packet));
-
-	if ((host.sock_tcp = socket(AF_INET, SOCK_RAW, IPPROTO_TCP)) == -1)
-		perror("server: socket");
-
-	int val = 1;
-	if (setsockopt(host.sock_tcp, IPPROTO_IP, IP_HDRINCL, &val, sizeof(val)) == -1)
-		return (1);
-
-
-	if (sendto(data->sock_tcp, &packet, sizeof(packet), 0,
-				host->addr, host->addrlen) < 0)
+	fan_in = chmake(sizeof(t_scan_result));
+	while (scan = bitfield_lsb(data.scans, USHRT_MAX + 1))
 	{
-		perror("sendto");
-		exit(1);
+		data.scans &= ~scan;
+		fan_in_local = hdup(fan_in);
+		scanner = g_scanners[scan];
+		go(scanner(fan_in_local, sock, target));
 	}
-	/* chrecv(channel, &buf, sizeof()) */
-	printf("packet sent\n");
-	hexdump(&packet, sizeof(packet));
+
+	while (nport)
+	{
+		int res;
+		if ((res = choose(clauses, nport, -1)) < 0)
+			printf("choose failed\n");
+		nhost--;
+		printf("finished scanning port %i\n", res);
+	}
+
+	chsend(ch, &host, sizeof(host), -1);
+	hclose(ch);
+}
+
+coroutine void	nmap_scan_host(int ch, t_data *data, t_target target)
+{
+	int			fan_in;
+	int			fan_in_local;
+	t_target	target;
+	int			port;
+
+	fan_in = chmake(sizeof(t_scan_result * SCAN_MAX));
+	while (port = bitfield_lsb(data.ports, USHRT_MAX + 1))
+	{
+		data.ports &= ~port;
+		fan_in_local = hdup(fan_in);
+		target.port = port;
+		go(nmap_scan_port(fan_in_local, data, port));
+	}
+
+	while (nport)
+	{
+		int res;
+		if ((res = choose(clauses, nport, -1)) < 0)
+			printf("choose failed\n");
+		nhost--;
+		printf("finished scanning port #%i\n", res);
+	}
+
+	chsend(ch, &host, sizeof(host), -1);
+	hclose(ch);
 }
 
 void	nmap(t_data *data)
 {
-	t_list			*list;
-	t_host			*host;
-	struct iphdr	iph;
+	t_list		*list;
+	t_host		*host;
+	int			nhost;
+	int			fan_in_local;
+	struct chclause	clause[ft_lstsize(data->host)];
+	int			buf;
 
-	iphdr_init(&iph);
-	iph.protocol = IPPROTO_TCP;
-	iph.daddr = *(uint32_t*)&((struct sockaddr_in*)host->addr)->sin_addr;
-	iph.saddr = *(uint32_t*)&((struct sockaddr_in*)&data->source_addr)->sin_addr;
-	iph.tot_len = htons(sizeof(t_tcp_packet));
-	int		fan_in = chmake(sizeof());
+	nhost = 0;
 	for (t_list *list = data->host; list != NULL; list = list->next)
 	{
-		t_host *host = list->content;
-		printf("scanning %s...\n", host->dn);
-		for (port = 1; port < USHRT_MAX; port++;)
-		{
-			if (data.ports[port])
-			{
-				int fan_in_local = hdup(fan_in);
-				go(nmap_scan_node(data, iph, port, fan_in_local));
-			}
-		}
+		host = list->content;
+		fan_in_local = hdup(fan_in);
+		target.host = host;
+		go(nmap_scan_host(fan_in_local, data, target));
+		nhost++;
 	}
+
+	while (nhost)
+	{
+		int res;
+		if ((res = choose(clauses, nhost, -1)) < 0)
+			printf("choose failed\n");
+		nhost--;
+		printf("host %s has finished scanning\n", host->dn);
+	}
+	printf("nmap has finished\n");
 	return (fan_in);
 }

@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/04/22 14:10:24 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/08 21:27:51 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/09 16:14:18 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,32 +32,22 @@
 
 # include "libdill.h"
 
-# define SCAN_TCP	(1 << 0)
-# define SCAN_SYN	(1 << 1)
-# define SCAN_NULL	(1 << 2)
-# define SCAN_ACK	(1 << 3)
-# define SCAN_FIN	(1 << 4)
-# define SCAN_XMAS	(1 << 5)
-# define SCAN_UDP	(1 << 6)
-# define SCAN_MAX	7
-
 typedef struct s_data	t_data;
 typedef struct s_host	t_host;
 typedef struct s_tcp_packet	t_tcp_packet;
 typedef enum e_port_status	t_port_status;
+typedef enum e_scan_type	t_scan_type;
 
-struct				s_data
+enum	e_scan_type
 {
-	t_flag			flag;
-	char			**av_data;
-	t_list			*host;
-
-	int				sock_tcp;
-	int				threads;
-	int				scan;
+	SCAN_TCP,
+	SCAN_SYN,
+	SCAN_ACK,
+	SCAN_FIN,
+	SCAN_XMAS,
+	SCAN_UDP,
+	SCAN_MAX
 };
-
-struct				
 
 enum	e_port_status
 {
@@ -68,20 +58,36 @@ enum	e_port_status
 	OPEN_FILTERED,
 };
 
+struct				s_data
+{
+	t_flag			flag;
+	char			**av_data;
+
+	int				sock[SCAN_MAX];
+	struct sockaddr	sock_a[SCAN_MAX];
+	int				threads;
+
+	t_list			*host;
+	BITFIELD(ports, USHRT_MAX + 1);
+	BITFIELD(scans, SCAN_MAX);
+};
+
 struct				s_host
 {
-	char			*host;					// user input host (ip or dn)
-	char			*dn;					// ai_canonname
-	char			ip[INET6_ADDRSTRLEN];	// readable ip address (4 or 6)
-	struct s_target	ports[USHRT_MAX + 1];
+	char			*host;								// user input host (ip or dn)
+	char			*dn;								// ai_canonname
+	char			ip[INET6_ADDRSTRLEN];				// humain readable ip address
 	struct sockaddr	*addr;
 	size_t			addrlen;
+	int				chan[USHRT_MAX + 1][SCAN_MAX];
 };
 
 struct				s_target
 {
-	int				in_channel;
-	t_port_status	results[SCAN_MAX];
+	t_host			*host;
+	uint16_t		port;
+	t_scan_type		scan;
+	#define capture_chan(t)	(t.host.chan[t.port][t.scan])
 };
 
 struct	s_tcp_packet

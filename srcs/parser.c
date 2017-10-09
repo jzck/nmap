@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/08 19:10:05 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/08 21:05:14 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/09 14:51:21 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,19 +82,17 @@ static int		nmap_get_scan(char *opt_arg, t_data *data)
 	while (*opt_arg)
 	{
 		if (*opt_arg == 'T')
-			data->scan |= SCAN_TCP;
+			bitfield_biton(data->scans, SCAN_TCP);
 		else if (*opt_arg == 'S')
-			data->scan |= SCAN_SYN;
-		else if (*opt_arg == 'N')
-			data->scan |= SCAN_NULL;
+			bitfield_biton(data->scans, SCAN_SYN);
 		else if (*opt_arg == 'A')
-			data->scan |= SCAN_ACK;
+			bitfield_biton(data->scans, SCAN_ACK);
 		else if (*opt_arg == 'F')
-			data->scan |= SCAN_FIN;
+			bitfield_biton(data->scans, SCAN_FIN);
 		else if (*opt_arg == 'X')
-			data->scan |= SCAN_XMAS;
+			bitfield_biton(data->scans, SCAN_XMAS);
 		else if (*opt_arg == 'U')
-			data->scan |= SCAN_UDP;
+			bitfield_biton(data->scans, SCAN_UDP);
 		else
 			return (1);
 		opt_arg++;
@@ -107,7 +105,7 @@ int		nmap_parse(int ac, char **av, t_data *data)
 	struct ifaddrs	*ifaddrs, *ifa_first;
 	(void)ac;
 	data->host = NULL;
-	bzero(data->ports, USHRT_MAX + 1);
+	bzero(data->ports, sizeof(data->ports));
 	data->threads = 0;
 	data->scan = 0;
 
@@ -132,18 +130,6 @@ int		nmap_parse(int ac, char **av, t_data *data)
 		exit(1);
 	}
 	freeifaddrs(ifa_first);
-
-	for (t_list *list = data->host; list != NULL; list = list->next)
-	{
-		t_host *host = list->content;
-		printf("scanning %s...\n", host->dn);
-		for (port = 1; port < USHRT_MAX; port++;)
-		{
-			if (data.ports[port])
-				host->channels[port] = chmake(sizeof(t_tcp_packet));
-		}
-	}
-
+	bitfield_biton(data->ports, 80);
 	return (0);
 }
-

@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/08 19:10:04 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/08 21:27:57 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/09 15:58:02 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,34 @@
 #define NMAP_USAGE1	" [--ip HOST] [--file FILE]"
 #define NMAP_USAGE2	" [--ports PORTS] [--speedup [NUMBER]] [--scan [TYPE]] HOST"
 
-int		nmap_ports(t_data *data, int ch)
+/*
+** only IPv4
+** only default network if
+** one per port per scan type
+*/
+int		fill_ports(t_data *data)
+{
+	int		i;
+
+	i = -1;
+	while (++i < SCAN_MAX)
+	{
+		if ((data->sock[i] = socket(AF_INET, SOCK_RAW, 0)) < 0)
+		{
+			perror("socket");
+			exit(1);
+		}
+		/* if (setsockopt(data->sock[i], IPPROTO_IP, IP_HDRINCL, (int[]){1}, sizeof(val)) == -1) */
+		/* 	return (1); */
+		data->sock_a[i].sin_family = AF_INET;
+		data->sock_a[i].sin_addr.s_addr = INADDR_ANY;
+		if (reserve_port(data.sock[i], &data.sock_a[i]))
+		{
+			fprintf(stderr, "couldn't reserve port\n");
+			exit(1);
+		}
+	}
+}
 
 int		main(int ac, char **av)
 {
@@ -32,19 +59,8 @@ int		main(int ac, char **av)
 		printf("or     nmap"NMAP_USAGE1 NMAP_USAGE2"\n");
 		exit(1);
 	}
-
-	// single tcp port
-	struct sockaddr_in	sa;
-	sa.sin_family = AF_INET;
-	sa.sin_addr.s_addr = INADDR_ANY;
-	if (reserve_port(data.sock_tcp, &sa))
-	{
-		fprintf(stderr, "couldn't reserve port\n");
-		exit(1);
-	}
-
+	fill_ports(&data);
 	go(nmap_listener(&data));
 	int chan = nmap(&data);
-	nmap_collector(chan, &data);
 	return (0);
 }

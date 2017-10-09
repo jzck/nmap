@@ -10,6 +10,12 @@ static void packet_callback(u_char *arg, const struct pcap_pkthdr *pkthdr, const
 	t_data *data = (t_data*)arg;
 	ft_printf("received packet !!!\n");
 	hexdump(&packet, sizeof(packet));
+	host = extract_host(pkt);
+	dport = extract_dport(pkt);
+	sport = extract_sport(pkt);
+
+	chan = get_chan(host, dport, sport);
+	chsend(ch, &pkt, sizeof(pkt), -1);
 }
 
 coroutine void	nmap_listener(t_data *data)
