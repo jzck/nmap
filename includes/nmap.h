@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/04/22 14:10:24 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/09 16:14:18 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/24 21:29:35 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <net/if.h>
 # include <netinet/in.h>
 # include <netinet/ip.h>
+# include <netinet/tcp.h>
 # include <netinet/ip_icmp.h>
 # include <netinet/if_ether.h>
 # include <pcap.h>
@@ -30,11 +31,13 @@
 # include <pthread.h>
 # include <ifaddrs.h>
 
-# include "libdill.h"
+# include "libmill.h"
 
 typedef struct s_data	t_data;
 typedef struct s_host	t_host;
 typedef struct s_tcp_packet	t_tcp_packet;
+typedef struct s_job	t_job;
+typedef struct s_result	t_result;
 typedef enum e_port_status	t_port_status;
 typedef enum e_scan_type	t_scan_type;
 
@@ -62,14 +65,6 @@ struct				s_data
 {
 	t_flag			flag;
 	char			**av_data;
-
-	int				sock[SCAN_MAX];
-	struct sockaddr	sock_a[SCAN_MAX];
-	int				threads;
-
-	t_list			*host;
-	BITFIELD(ports, USHRT_MAX + 1);
-	BITFIELD(scans, SCAN_MAX);
 };
 
 struct				s_host
@@ -79,27 +74,35 @@ struct				s_host
 	char			ip[INET6_ADDRSTRLEN];				// humain readable ip address
 	struct sockaddr	*addr;
 	size_t			addrlen;
-	int				chan[USHRT_MAX + 1][SCAN_MAX];
 };
 
-struct				s_target
+struct				s_job
 {
-	t_host			*host;
-	uint16_t		port;
-	t_scan_type		scan;
-	#define capture_chan(t)	(t.host.chan[t.port][t.scan])
+	ipaddr			dest;
+	void			(*scan)();
 };
 
-struct	s_tcp_packet
+struct				s_result
 {
-	struct iphdr iph;
-	struct tcphdr tcph;
-}__attribute__((packed));
+	ipaddr			dest;
+	char			scan[4];
+	t_port_status	status;
+};
 
-static t_cliopts	g_opts[];
-int		nmap_parse(int ac, char **av, t_data *data);
+extern t_cliopts	g_opts[];
+extern int			g_njobs;
+chan				nmap_parse(int ac, char **av);
+void				nmap_format(chan results);
 
-void	nmap(t_data *data);
-void	nmap_listener(void *arg);
+coroutine void		nmap_scan_tcp(chan results, t_job job);
+chan				nmap_listener(ipaddr dst, ipaddr src);
+
+/*
+**	IP helpers
+*/
+uint16_t	ipport(ipaddr ip);
+uint16_t	ipmode(ipaddr ip);
+uint16_t	ipfamily(ipaddr ip);
+ipaddr		iplocal_randport(const char *name, int mode, int sock);
 
 #endif

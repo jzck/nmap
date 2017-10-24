@@ -6,7 +6,7 @@
 /*   By: jhalford <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/07 13:49:04 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/08 15:59:49 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/24 21:38:26 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,8 +37,9 @@
 # include "math.h"
 # include "mytime.h"
 # include "get_next_line.h"
-# include "net.h"
 # include "sys.h"
+# include "net.h"
+# include "prettypacket.h"
 
 struct	s_stos
 {

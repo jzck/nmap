@@ -1,33 +1,54 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   listener.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/10/23 19:16:39 by jhalford          #+#    #+#             */
+/*   Updated: 2017/10/24 21:28:44 by jhalford         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "nmap.h"
 
-static pcap_t *pcap_obj = NULL;
+#define PCAP_FILTER\
+	"src host %s and src port %i and dst host %s and dst port %i"
 
-static void packet_callback(u_char *arg, const struct pcap_pkthdr *pkthdr, const u_char *packet)
+static void packet_callback(u_char *arg, const struct pcap_pkthdr *pkthdr,
+		const u_char *packet)
 
 {
 	(void)pkthdr;
 	(void)packet;
-	t_data *data = (t_data*)arg;
+	chan ch = (chan)arg;
 	ft_printf("received packet !!!\n");
-	hexdump(&packet, sizeof(packet));
-	host = extract_host(pkt);
-	dport = extract_dport(pkt);
-	sport = extract_sport(pkt);
-
-	chan = get_chan(host, dport, sport);
-	chsend(ch, &pkt, sizeof(pkt), -1);
+	prettypacket((void*)packet, pkthdr->len);
+	(void)ch;
+	/* chs(ch, struct tcphdr, *(t_tcp_packet*)packet); */
 }
 
-coroutine void	nmap_listener(t_data *data)
+coroutine void	listener_loop(chan ch, pcap_t *pcap_obj)
 {
-	t_data *data;
-	char errbuf[PCAP_ERRBUF_SIZE];
-	bpf_u_int32 netp;
-	bpf_u_int32 maskp;
-	struct bpf_program fp;
-	char *str;
+	ft_printf("listener loop\n");
+	if (pcap_loop(pcap_obj, -1, packet_callback, (u_char*)ch) == -1)
+	{
+		ft_printf("pcap_loop fail\n");
+		exit(EXIT_FAILURE);
+	}
+}
 
-	data = (t_data*)arg;
+chan			nmap_listener(ipaddr dst, ipaddr src)
+{
+	char			errbuf[PCAP_ERRBUF_SIZE];
+	pcap_t			*pcap_obj;
+	bpf_u_int32		netp;
+	bpf_u_int32		maskp;
+	struct bpf_program fp;
+	char	str[100];
+	chan	pkts;
+
+	pkts = chmake(struct tcphdr, 10);
 	if (pcap_lookupnet("any", &netp, &maskp, errbuf) == -1)
 	{
 		exit(EXIT_FAILURE);
@@ -37,24 +58,13 @@ coroutine void	nmap_listener(t_data *data)
 		fprintf(stderr, "pcap_open_live: %s", errbuf);
 		exit(EXIT_FAILURE);
 	}
-	if (!(str = ft_str3join("host ", ((t_host*)data->host->content)->ip, " and (tcp or icmp)")))
-	{
+	if (!(sprintf(str, PCAP_FILTER, ipaddrstr(dst, str), ipport(dst),
+									ipaddrstr(src, str), ipport(src))))
 		exit(EXIT_FAILURE);
-	}
 	if (pcap_compile(pcap_obj, &fp, str, 1, netp) == -1)
-	{
 		exit(EXIT_FAILURE);
-	}
 	if (pcap_setfilter(pcap_obj, &fp) == -1)
-	{
 		exit(EXIT_FAILURE);
-	}
-	/* signal(SIGALRM, sigalrm_handler); */
-	ft_printf("listener loop\n");
-	if (pcap_loop(pcap_obj, -1, packet_callback, (u_char*)data) == -1)
-	{
-		ft_printf("pcap_loop fail\n");
-		exit(EXIT_FAILURE);
-	}
-	free(str);
+	go(listener_loop(pkts, pcap_obj));
+	return (chdup(pkts));
 }

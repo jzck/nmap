@@ -6,7 +6,7 @@
 #    By: wescande <wescande@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/08/29 21:32:58 by wescande          #+#    #+#              #
-#    Updated: 2017/10/08 19:09:21 by jhalford         ###   ########.fr        #
+#    Updated: 2017/10/24 14:33:26 by jhalford         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,10 +31,12 @@ INC_DIR		=	includes/
 OBJ_DIR		=	objs/
 
 SRC_BASE	=	\
-main.c\
-nmap.c\
-parser.c\
+format.c\
+ip.c\
 listener.c\
+main.c\
+parser.c\
+scanners.c
 
 SRCS		=	$(addprefix $(SRC_DIR), $(SRC_BASE))
 OBJS		=	$(addprefix $(OBJ_DIR), $(SRC_BASE:.c=.o))
@@ -52,7 +54,7 @@ $(NAME):	$(LIBFT_LIB) $(OBJ_DIR) $(OBJS) $(CLIENT_OBJ)
 		-I $(LIBFT_INC) \
 		-L $(HOME)/.bin/lib \
 		$(LIBFT_LIB) $(CLIENT_OBJ) $(FLAGS) \
-		-lm -lpcap -lpthread /usr/local/lib/libdill.a
+		-lm -lpcap -lpthread $(HOME)/.bin/lib/libmill.a
 	@printf "\r\033[38;5;117m✓ MAKE $@ \033[0m\033[K\n"
 
 $(LIBFT_LIB):

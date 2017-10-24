@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/07 18:06:12 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/08 16:52:48 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/24 20:55:02 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@
 **	utilities
 */
 
-int				reserve_port(int *port);
+int				reserve_port(int s, struct sockaddr *sa);
 unsigned short	cksum(void *b, int len);
 int				host_format(struct sockaddr *addr);
 
@@ -63,5 +63,11 @@ void			ip_load_icmp(struct icmp *icmp, void *buf);
 **		tcp
 */
 void			tcp_hdrinit(struct tcphdr *header);
+
+
+/*
+**		prettypacket
+*/
+int				prettypacket(void *pkt, size_t size);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/08 19:10:04 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/09 15:58:02 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/24 20:08:00 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,52 +15,53 @@
 #define NMAP_USAGE1	" [--ip HOST] [--file FILE]"
 #define NMAP_USAGE2	" [--ports PORTS] [--speedup [NUMBER]] [--scan [TYPE]] HOST"
 
-/*
-** only IPv4
-** only default network if
-** one per port per scan type
-*/
-int		fill_ports(t_data *data)
-{
-	int		i;
+t_data	*g_data;
 
-	i = -1;
-	while (++i < SCAN_MAX)
+coroutine void	jobs_loop(chan jobs, chan results)
+{
+	t_job	job;
+	chan	copy;
+	int		i;
+	
+	i = 0;
+	while (true)
 	{
-		if ((data->sock[i] = socket(AF_INET, SOCK_RAW, 0)) < 0)
-		{
-			perror("socket");
-			exit(1);
-		}
-		/* if (setsockopt(data->sock[i], IPPROTO_IP, IP_HDRINCL, (int[]){1}, sizeof(val)) == -1) */
-		/* 	return (1); */
-		data->sock_a[i].sin_family = AF_INET;
-		data->sock_a[i].sin_addr.s_addr = INADDR_ANY;
-		if (reserve_port(data.sock[i], &data.sock_a[i]))
-		{
-			fprintf(stderr, "couldn't reserve port\n");
-			exit(1);
-		}
+		job = chr(jobs, t_job);
+		if (job.scan == NULL)
+			break ;
+		copy = chdup(results);
+		go(job.scan(copy, job));
+		i++;
 	}
+	printf("finished starting jobs\n");
 }
 
-int		main(int ac, char **av)
+static chan		nmap(chan jobs)
 {
-	t_data				data;
+	chan	results;
 
-	if (getuid() != 0)
-	{
-		fprintf(stderr, "You must have root privileges to use nmap!\n");
-		return(1);
-	}
-	if (nmap_parse(ac, av, &data))
+	results = chmake(t_result, 0);
+	go(jobs_loop(jobs, results));
+	return (results);
+}
+
+int			main(int ac, char **av)
+{
+	chan		jobs;
+	chan		results;
+
+	/* if (getuid() != 0) */
+	/* { */
+	/* 	fprintf(stderr, "You must have root privileges to use nmap!\n"); */
+	/* 	return(1); */
+	/* } */
+	if ((jobs = nmap_parse(ac, av)) < 0)
 	{
 		printf("usage: nmap --help\n");
 		printf("or     nmap"NMAP_USAGE1 NMAP_USAGE2"\n");
 		exit(1);
 	}
-	fill_ports(&data);
-	go(nmap_listener(&data));
-	int chan = nmap(&data);
+	results = nmap(jobs);
+	nmap_format(results);
 	return (0);
 }

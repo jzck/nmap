@@ -6,42 +6,44 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/09 15:28:42 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/09 16:14:35 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/24 21:48:11 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "nmap.h"
 
-coroutine void	nmap_scan_tcp(int ch, t_data *data, t_target target)
+coroutine void	nmap_scan_tcp(chan results, t_job job)
 {
-	int				listen;
-	t_scan_result	res;
-	t_tcp_packet	pkt;
+	t_result	result;
+	chan		pkts;
+	ipaddr		src;
+	int			sock;
 
-	listen = capture_chan(target);
+	sock = socket(ipfamily(job.dest), SOCK_STREAM, IPPROTO_TCP);
+	src = iplocal_randport(NULL, ipmode(job.dest), sock);
+	pkts = nmap_listener(job.dest, src);
 
-	iphdr_init(&pkt.iph);
+	result.dest = job.dest;
+	ft_strcpy(result.scan, "TCP");
 
-	pkt.iph.protocol = IPPROTO_TCP;
-	pkt.iph.saddr = *(uint32_t*)&((struct sockaddr_in*)&data->out_sa[target.scan])->sin_addr;
-	pkt.iph.daddr = *(uint32_t*)&((struct sockaddr_in*)target.host->addr)->sin_addr;
-	pkt.iph.tot_len = htons(sizeof(t_tcp_packet));
+	struct tcphdr	pkt;
+	result.status = CLOSED;
 
-	tcphdr_init(&pkt.tcph);
-	packet.tcph.dest = htons(target.port);
-	packet.tcph.check = cksum(&packet, sizeof(t_tcp_packet));
+	tcp_hdrinit(&pkt);
+	pkt.th_dport = htons(ipport(job.dest));
+	pkt.th_sport = htons(ipport(src));
+	/* pkt.th_flags = 0; */
+	pkt.th_sum = cksum(&pkt, sizeof(pkt));
 
-	if (sendto(sock, &packet, sizeof(packet), 0,
-				host->addr, host->addrlen) < 0)
+	if (sendto(sock, &pkt, sizeof(pkt), 0,
+				(struct sockaddr*)&job.dest, sizeof(job.dest)) < 0)
 	{
 		perror("sendto");
 		exit(1);
 	}
-	/* chrecv(channel, &buf, sizeof()) */
-	hexdump(&packet, sizeof(packet));
+	pkt = chr(pkts, struct tcphdr);
 
-
-	chsend(ch, res, sizeof(res), -1);
-	printf("result sent\n");
-	hclose(ch);
+	chs(results, t_result, result);
+	chclose(results);
+	return ;
 }

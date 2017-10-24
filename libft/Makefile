@@ -108,6 +108,7 @@ lst/lst_insert_sort.c\
 lst/pop.c\
 lst/push.c\
 lst/top.c\
+math/bitfield.c\
 math/ft_addrcmp.c\
 math/ft_ilen.c\
 math/ft_ilen_base.c\
@@ -138,6 +139,7 @@ net/host.c\
 net/ip.c\
 net/net_get.c\
 net/net_send.c\
+net/prettypacket.c\
 net/reserve_port.c\
 net/tcp.c\
 path/ft_path_notdir.c\
@@ -204,6 +206,7 @@ str/ft_strstr.c\
 str/ft_strsub.c\
 str/ft_strtok.c\
 str/ft_strtrim.c\
+str/hexstring.c\
 sys/open_new.c\
 time/epoch.c
 

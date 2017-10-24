@@ -6,62 +6,62 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/08 19:10:05 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/09 14:51:21 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/24 21:00:10 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "nmap.h"
 
-static t_cliopts	g_opts[] =
-{
-	{'h', "host", 0, 0, nmap_get_host, 0},
-	/* {'f', "file", 0, 0, nmap_get_file, 0}, */
-	/* {'p', "ports", 0, 0, nmap_get_ports, 0}, */
-	{'t', "threads", 0, 0, nmap_get_threads, 0},
-	{'s', "scan", 0, 0, nmap_get_scan, 0},
-	{0, 0, 0, 0, 0, 0},
-};
+extern int g_njobs;
 
-static int		nmap_get_host(char *node, t_data *data)
-{
-	t_host	host;
-	struct addrinfo		*servinfo, hints;
+/* static t_cliopts	g_opts[] = */
+/* { */
+/* 	{'h', "host", 0, 0, nmap_get_host, 0}, */
+/* 	/1* {'f', "file", 0, 0, nmap_get_file, 0}, *1/ */
+/* 	/1* {'p', "ports", 0, 0, nmap_get_ports, 0}, *1/ */
+/* 	{'t', "threads", 0, 0, nmap_get_threads, 0}, */
+/* 	{'s', "scan", 0, 0, nmap_get_scan, 0}, */
+/* 	{0, 0, 0, 0, 0, 0}, */
+/* }; */
 
-	memset (&hints, 0, sizeof (hints));
-	hints.ai_family = PF_UNSPEC;
-	hints.ai_socktype = SOCK_RAW;
-	hints.ai_flags = AI_CANONNAME;
+/* static t_host		nmap_get_host(char *node) */
+/* { */
+/* 	t_host	host; */
+/* 	struct addrinfo		*servinfo, hints; */
 
-	if (getaddrinfo(node, NULL, &hints, &servinfo))
-	{
-		fprintf(stderr, "Failed to resolve \"%s\"\n", node);
-		return (1);
-	}
-	host.addr = servinfo->ai_addr;
-	host.addrlen = servinfo->ai_addrlen;
-	host.host = node;
-	host.dn = servinfo->ai_canonname;
+/* 	memset (&hints, 0, sizeof (hints)); */
+/* 	hints.ai_family = PF_UNSPEC; */
+/* 	hints.ai_socktype = SOCK_RAW; */
+/* 	hints.ai_flags = AI_CANONNAME; */
 
-	void *addr;
-	if (servinfo->ai_family == AF_INET) { // IPv4
-		struct sockaddr_in *ipv4 = (struct sockaddr_in *)servinfo->ai_addr;
-		addr = &(ipv4->sin_addr);
-	} else { // IPv6
-		struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)servinfo->ai_addr;
-		addr = &(ipv6->sin6_addr);
-	}
+/* 	if (getaddrinfo(node, NULL, &hints, &servinfo)) */
+/* 	{ */
+/* 		fprintf(stderr, "Failed to resolve \"%s\"\n", node); */
+/* 		return (host); */
+/* 	} */
+/* 	host.addr = servinfo->ai_addr; */
+/* 	host.addrlen = servinfo->ai_addrlen; */
+/* 	host.host = node; */
+/* 	host.dn = servinfo->ai_canonname; */
 
-	// convert the IP to a string and print it:
-	inet_ntop(servinfo->ai_family, addr, host.ip, sizeof(host.ip));
+/* 	void *addr; */
+/* 	if (servinfo->ai_family == AF_INET) { // IPv4 */
+/* 		struct sockaddr_in *ipv4 = (struct sockaddr_in *)servinfo->ai_addr; */
+/* 		addr = &(ipv4->sin_addr); */
+/* 	} else { // IPv6 */
+/* 		struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)servinfo->ai_addr; */
+/* 		addr = &(ipv6->sin6_addr); */
+/* 	} */
 
-	printf("dn=%s, ip=%s\n", host.dn, host.ip);
+/* 	// convert the IP to a string and print it: */
+/* 	inet_ntop(servinfo->ai_family, addr, host.ip, sizeof(host.ip)); */
 
-	/* MUST DO rDNS search here */
-	/* printf("rDNS record for %s: %s\n", addrstr, DOMAIN NAME WITH RDNS); */
+/* 	printf("dn=%s, ip=%s\n", host.dn, host.ip); */
 
-	ft_lsteadd(&data->host, ft_lstnew(&host, sizeof(host)));
-	return (0);
-}
+/* 	/1* MUST DO rDNS search here *1/ */
+/* 	/1* printf("rDNS record for %s: %s\n", addrstr, DOMAIN NAME WITH RDNS); *1/ */
+/* 	return (host); */
+/* } */
 
 /* int		nmap_get_file(char *opt_arg, t_data *data) */
 /* { */
@@ -71,65 +71,64 @@ static int		nmap_get_host(char *node, t_data *data)
 /* { */
 /* } */
 
-static int		nmap_get_threads(char *opt_arg, t_data *data)
+/* static int		nmap_get_threads(char *opt_arg, t_data *data) */
+/* { */
+/* 	data->threads = ft_atoi(opt_arg); */
+/* 	return (0); */
+/* } */
+
+/* static int		nmap_get_scan(char *opt_arg, t_data *data) */
+/* { */
+/* 	while (*opt_arg) */
+/* 	{ */
+/* 		if (*opt_arg == 'T') */
+/* 			bitfield_biton(data->scans, SCAN_TCP); */
+/* 		else if (*opt_arg == 'S') */
+/* 			bitfield_biton(data->scans, SCAN_SYN); */
+/* 		else if (*opt_arg == 'A') */
+/* 			bitfield_biton(data->scans, SCAN_ACK); */
+/* 		else if (*opt_arg == 'F') */
+/* 			bitfield_biton(data->scans, SCAN_FIN); */
+/* 		else if (*opt_arg == 'X') */
+/* 			bitfield_biton(data->scans, SCAN_XMAS); */
+/* 		else if (*opt_arg == 'U') */
+/* 			bitfield_biton(data->scans, SCAN_UDP); */
+/* 		else */
+/* 			return (1); */
+/* 		opt_arg++; */
+/* 	} */
+/* 	return (0); */
+/* } */
+
+coroutine void	coarse_dispatcher(chan jobs)
 {
-	data->threads = ft_atoi(opt_arg);
-	return (0);
+	t_job	job;
+
+	job.scan = nmap_scan_tcp;
+
+	job.dest = ipremote("scanme.nmap.org", 80, IPADDR_IPV4, -1);
+	chs(jobs, t_job, job);
+	job.dest = ipremote("scanme.nmap.org", 81, IPADDR_IPV4, -1);
+	chs(jobs, t_job, job);
+
+	job.scan = 0;
+	chdone(jobs, t_job, job);
+	chclose(jobs);
 }
 
-static int		nmap_get_scan(char *opt_arg, t_data *data)
+chan	nmap_parse(int ac, char **av)
 {
-	while (*opt_arg)
-	{
-		if (*opt_arg == 'T')
-			bitfield_biton(data->scans, SCAN_TCP);
-		else if (*opt_arg == 'S')
-			bitfield_biton(data->scans, SCAN_SYN);
-		else if (*opt_arg == 'A')
-			bitfield_biton(data->scans, SCAN_ACK);
-		else if (*opt_arg == 'F')
-			bitfield_biton(data->scans, SCAN_FIN);
-		else if (*opt_arg == 'X')
-			bitfield_biton(data->scans, SCAN_XMAS);
-		else if (*opt_arg == 'U')
-			bitfield_biton(data->scans, SCAN_UDP);
-		else
-			return (1);
-		opt_arg++;
-	}
-	return (0);
-}
-
-int		nmap_parse(int ac, char **av, t_data *data)
-{
-	struct ifaddrs	*ifaddrs, *ifa_first;
 	(void)ac;
-	data->host = NULL;
-	bzero(data->ports, sizeof(data->ports));
-	data->threads = 0;
-	data->scan = 0;
+	(void)av;
+	/* if (cliopts_get(av, g_opts, data)) */
+	/* 	return (ft_perror("nmap")); */
+	/* if (!data->host && data->av_data && data->av_data) */
+	/* 	nmap_get_host(*data->av_data, data); */
 
-	if (cliopts_get(av, g_opts, data))
-		return (ft_perror("nmap"));
-	if (!data->host && data->av_data && data->av_data)
-		nmap_get_host(*data->av_data, data);
-	if (!data->scan)
-		data->scan = SCAN_TCP;
-	getifaddrs(&ifa_first);
-	for (ifaddrs = ifa_first; ifaddrs && ifaddrs->ifa_flags & IFF_LOOPBACK; ifaddrs = ifaddrs->ifa_next)
-		 ;
-	if (ifaddrs)
-	{
-		ifaddrs=ifaddrs->ifa_next;
-		printf("if=%s\n", ifaddrs->ifa_name);
-		data->source_addr = *ifaddrs->ifa_addr;
-	}
-	else
-	{
-		fprintf(stderr, "couldn't find an internet interface\n");
-		exit(1);
-	}
-	freeifaddrs(ifa_first);
-	bitfield_biton(data->ports, 80);
-	return (0);
+	chan	jobs;
+	jobs = chmake(t_job, 0);
+	go(coarse_dispatcher(jobs));
+	g_njobs = 2;
+
+	return (jobs);
 }
