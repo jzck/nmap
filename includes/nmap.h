@@ -95,7 +95,7 @@ chan				nmap_parse(int ac, char **av);
 void				nmap_format(chan results);
 
 coroutine void		nmap_scan_tcp(chan results, t_job job);
-chan				nmap_listener(ipaddr dst, ipaddr src);
+pcap_t				*nmap_capture(ipaddr dst, ipaddr src);
 
 /*
 **	IP helpers

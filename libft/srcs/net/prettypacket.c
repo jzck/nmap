@@ -35,6 +35,38 @@ enum packet_type {
     stp
 };
 
+/**
+ * List of available colors
+ */
+static const char *colors[] = {
+    /// Black
+    "\\e[0;30m",
+    /// Red
+    "\\e[0;31m",
+    /// Green
+    "\\e[0;32m",
+    /// Yellow
+    "\\e[0;33m",
+    /// Blue
+    "\\e[0;34m",
+    /// Purple
+    "\\e[0;35m",
+    /// Cyan
+    "\\e[0;36m",
+    /// White
+    "\\e[0;37m",
+};
+
+/**
+ * Default terminal rows
+ */
+static const int rows = 24;
+
+/**
+ * Default terminal columns
+ */
+static const int cols = 80;
+
 /*
 ** Packets disassembling loop
 **		layer 2: isl, llc1, llc2, ethenet	or payload
@@ -115,11 +147,22 @@ static inline void field_print (const char *packet_buffer, int field_size,
 		int *counter, const char *field_text) {
     
     char *tmp_hexstr = raw_to_hexstr(packet_buffer + *counter, field_size);
-    *counter += field_size;
 
-    printf(" %-24s %s\n", tmp_hexstr, field_text);
-    
+    printf(" %-24s %s", tmp_hexstr, field_text);
+	if (strstr(field_text, "port") && field_size == 2)
+	{
+		short port = *(short*)(packet_buffer + *counter);
+		char	service[20];
+		struct sockaddr	sa;
+
+		((struct sockaddr_in *)&sa)->sin_family = AF_INET;
+		((struct sockaddr_in *)&sa)->sin_port = port;
+		getnameinfo(&sa, sizeof sa, NULL, 0, service, sizeof service, 0);
+		printf(" (%s)", service);
+	}
+	printf("\n");
     free(tmp_hexstr);
+    *counter += field_size;
 }
 
 /**
@@ -163,10 +206,13 @@ void payload_print (const char *packet_buffer, int size) {
  * @param packet_buffer raw packet captured from the network, starting at the part to process
  * @param size packet_buffer size
  */
-void tcp_print (const char *packet_buffer, int size) {
+void tcp_print(const char *packet_buffer, int size) {
     int counter = 0;
-
-    puts("\nTCP Header:");
+	unsigned short	check = cksum(packet_buffer, 20);
+	if (check == 0)
+		printf("\nTCP Header: (20 bytes), cksum OK\n");
+	else
+		printf("\nTCP Header: (20 bytes), cksum incorrect, malformed packet! (%x)\n", check);
 
     if (size < 8) {
         puts (" invalid header size");
@@ -197,7 +243,7 @@ void tcp_print (const char *packet_buffer, int size) {
 void udp_print (const char *packet_buffer, int size) {
     int counter = 0;
 
-    puts("\nUDP Header:");
+    puts("\nUDP Header: (8 bytes)");
 
     if (size < 8) {
         puts (" invalid header size");

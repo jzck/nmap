@@ -36,14 +36,4 @@ size_t	ft_lllen_base(long long n, int base);
 int		ft_addrcmp(void *a, void *b);
 void	*id(void *data);
 
-typedef uint64_t		t_bitblock;
-#define BITFIELD(var, size)	t_bitblock var[size / sizeof(t_bitblock) + 1]\
-										= {[0] = size}
-#define BLOCKSIZE			(8 * sizeof(t_bitblock))
-
-
-extern inline void		bitfield_biton(t_bitblock field[], uint64_t bit);
-extern inline void		bitfield_bitoff(t_bitblock field[], uint64_t bit);
-extern inline uint64_t	bitfield_lsb(t_bitblock field[]);
-
 #endif

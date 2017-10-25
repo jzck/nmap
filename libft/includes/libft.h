@@ -20,7 +20,8 @@
 # include <unistd.h>
 # include <stdio.h>
 # include <stdlib.h>
-# include <time.h>
+# include <stdint.h>
+# include <ft_time.h>
 
 # include "ft_types.h"
 # include "error.h"
@@ -35,7 +36,7 @@
 # include "str.h"
 # include "sstr.h"
 # include "math.h"
-# include "mytime.h"
+# include "time.h"
 # include "get_next_line.h"
 # include "sys.h"
 # include "net.h"

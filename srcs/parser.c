@@ -108,10 +108,11 @@ coroutine void	coarse_dispatcher(chan jobs)
 
 	job.dest = ipremote("scanme.nmap.org", 80, IPADDR_IPV4, -1);
 	chs(jobs, t_job, job);
-	job.dest = ipremote("scanme.nmap.org", 81, IPADDR_IPV4, -1);
-	chs(jobs, t_job, job);
+	/* job.dest = ipremote("scanme.nmap.org", 81, IPADDR_IPV4, -1); */
+	/* chs(jobs, t_job, job); */
 
 	job.scan = 0;
+	DG("sending done job");
 	chdone(jobs, t_job, job);
 	chclose(jobs);
 }
@@ -127,8 +128,11 @@ chan	nmap_parse(int ac, char **av)
 
 	chan	jobs;
 	jobs = chmake(t_job, 0);
-	go(coarse_dispatcher(jobs));
-	g_njobs = 2;
 
-	return (jobs);
+	/* ft_usage("nmap"NMAP_USAGE1 NMAP_USAGE2); */
+
+	go(coarse_dispatcher(jobs));
+	g_njobs = 1;
+
+	return (chdup(jobs));
 }

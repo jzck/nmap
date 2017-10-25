@@ -26,14 +26,14 @@
 # include <netinet/ip_icmp.h>
 # include <arpa/inet.h>
 
-# include "mytime.h"
+# include "ft_time.h"
 
 /*
 **	utilities
 */
 
 int				reserve_port(int s, struct sockaddr *sa);
-unsigned short	cksum(void *b, int len);
+unsigned short	cksum(const void *b, size_t len);
 int				host_format(struct sockaddr *addr);
 
 /*
@@ -69,5 +69,8 @@ void			tcp_hdrinit(struct tcphdr *header);
 **		prettypacket
 */
 int				prettypacket(void *pkt, size_t size);
+void			tcp_print(const char *packet_buffer, int size);
+void			udp_print(const char *packet_buffer, int size);
+
 
 #endif

@@ -31,12 +31,12 @@ INC_DIR		=	includes/
 OBJ_DIR		=	objs/
 
 SRC_BASE	=	\
-format.c\
-ip.c\
-listener.c\
-main.c\
+scanners.c\
 parser.c\
-scanners.c
+main.c\
+capture.c\
+format.c\
+ip.c
 
 SRCS		=	$(addprefix $(SRC_DIR), $(SRC_BASE))
 OBJS		=	$(addprefix $(OBJ_DIR), $(SRC_BASE:.c=.o))

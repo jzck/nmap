@@ -38,5 +38,5 @@ void		nmap_format(chan results)
 				g_port_status[result.status],
 				result.scan);
 	}
-	printf("finished reading %i jobs\n", g_njobs);
+	DG("finished reading %i jobs\n", g_njobs);
 }

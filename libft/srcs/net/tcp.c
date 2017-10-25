@@ -17,7 +17,8 @@ void	tcp_hdrinit(struct tcphdr *header)
 	memset(header, 0, sizeof(*header));
 	header->th_sport = htons(0);
 	header->th_dport = htons(0);
-	header->th_seq = epoch_micro();
+	/* header->th_seq = epoch_micro(); */
+	header->th_seq = 0;
 	header->th_ack = 0;
 	header->th_off = 5;
 	header->th_flags = 0;

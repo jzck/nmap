@@ -24,9 +24,11 @@ coroutine void	jobs_loop(chan jobs, chan results)
 	int		i;
 	
 	i = 0;
-	while (true)
+	while (1)
 	{
+		DG("before chr jobs");
 		job = chr(jobs, t_job);
+		DG("after chr jobs");
 		if (job.scan == NULL)
 			break ;
 		copy = chdup(results);
@@ -52,15 +54,10 @@ int			main(int ac, char **av)
 
 	/* if (getuid() != 0) */
 	/* { */
-	/* 	fprintf(stderr, "You must have root privileges to use nmap!\n"); */
+	/* 	fprintf(stderr, "You must have root privileges to use nmap\n"); */
 	/* 	return(1); */
 	/* } */
-	if ((jobs = nmap_parse(ac, av)) < 0)
-	{
-		printf("usage: nmap --help\n");
-		printf("or     nmap"NMAP_USAGE1 NMAP_USAGE2"\n");
-		exit(1);
-	}
+	jobs = nmap_parse(ac, av);
 	results = nmap(jobs);
 	nmap_format(results);
 	return (0);

@@ -10,8 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MYTIME_H
-# define MYTIME_H
+#ifndef TIME_H
+# define TIME_H
 
 # include <sys/time.h>
 
