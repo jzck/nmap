@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/09 15:28:42 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/24 21:48:11 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/26 17:20:20 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,4 +59,5 @@ coroutine void	nmap_scan_tcp(chan results, t_job job)
 	chs(results, t_result, result);
 	chclose(results);
 	return ;
+
 }

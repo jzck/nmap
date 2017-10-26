@@ -58,11 +58,6 @@ static const char *colors[] = {
 };
 
 /**
- * Default terminal rows
- */
-static const int rows = 24;
-
-/**
  * Default terminal columns
  */
 static const int cols = 80;

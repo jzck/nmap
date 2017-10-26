@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/04/22 14:10:24 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/24 21:29:35 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/26 17:07:40 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,16 +28,14 @@
 # include <netinet/if_ether.h>
 # include <pcap.h>
 # include <sys/wait.h>
-# include <pthread.h>
 # include <ifaddrs.h>
 
 # include "libmill.h"
 
-typedef struct s_data	t_data;
-typedef struct s_host	t_host;
-typedef struct s_tcp_packet	t_tcp_packet;
-typedef struct s_job	t_job;
-typedef struct s_result	t_result;
+typedef struct s_data		t_data;
+typedef struct s_host		t_host;
+typedef struct s_job		t_job;
+typedef struct s_result		t_result;
 typedef enum e_port_status	t_port_status;
 typedef enum e_scan_type	t_scan_type;
 
@@ -65,15 +63,6 @@ struct				s_data
 {
 	t_flag			flag;
 	char			**av_data;
-};
-
-struct				s_host
-{
-	char			*host;								// user input host (ip or dn)
-	char			*dn;								// ai_canonname
-	char			ip[INET6_ADDRSTRLEN];				// humain readable ip address
-	struct sockaddr	*addr;
-	size_t			addrlen;
 };
 
 struct				s_job
