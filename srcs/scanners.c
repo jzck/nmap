@@ -6,7 +6,7 @@
 /*   By: jhalford <jack@crans.org>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/10/09 15:28:42 by jhalford          #+#    #+#             */
-/*   Updated: 2017/10/26 17:20:20 by jhalford         ###   ########.fr       */
+/*   Updated: 2017/10/26 17:37:43 by jhalford         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ coroutine void	nmap_scan_tcp(chan results, t_job job)
 
 	// REQ
 	DG("check");
+	fdwait(sock, FDW_IN, now() + 1000);
 	if (sendto(sock, &pkt, sizeof(pkt), 0, (struct sockaddr*)&job.dest, sizeof(job.dest)) < 0)
 	{
 		DG("check 1");
